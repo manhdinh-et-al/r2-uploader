@@ -517,21 +517,19 @@ let sharingThisFile = function (key) {
   }
 
   axios({
-    method: 'get',
+    method: 'post',
     headers: {
       'x-api-key': localStorage.getItem('apiKey')
     },
     url: endPoint + 'share?Key=' + fileName + '&ExpireTime=' + expireDate.value
   })
     .then(async (res) => {
-      const demo = res.data.url;
-      const value = "https://my-bucket.s3.amazonaws.com/photos/image1.jpg?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1633017600&Signature=OjnLpbKhxRVrbmp57UpO91G7EXAMPLE"
-      presignedUrl.value = value
+      const url = endPoint + fileName + '?PresignedUrl=' + res.data
+      presignedUrl.value = url
     })
     .catch(() => {
-      const value = "https://my-bucket.s3.amazonaws.com/photos/image1.jpg?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1633017600&Signature=OjnLpbKhxRVrbmp57UpO91G7EXAMPLE"
-      presignedUrl.value = value
-      //alert('Failed to delete file.')
+      presignedUrl.value = '';
+      alert('Failed to delete file.')
     })
   shareLoading.value = false;
 }
