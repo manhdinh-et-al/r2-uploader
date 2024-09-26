@@ -5,61 +5,42 @@
     </div>
 
     <div class="mt-4 mb-4 flex items-center flex-wrap space-x-2">
-      <button
-        v-show="!selectMode"
-        class="text-xs inline-block w-auto outline mb-0"
-        style="padding: 0.3rem 0.5rem"
-        @click="loadData"
-        :aria-busy="loading"
-        :disabled="loading || !endPoint"
-      >Refresh
+      <button v-show="!selectMode" class="text-xs inline-block w-auto outline mb-0" style="padding: 0.3rem 0.5rem"
+        @click="loadData" :aria-busy="loading" :disabled="loading || !endPoint">Refresh
       </button>
-      <button
-        class="text-xs inline-block w-auto outline mb-0"
-        style="padding: 0.3rem 0.5rem"
-        @click="toggleSelectMode"
-        :disabled="fileList.length === 0"
-      >
+      <button class="text-xs inline-block w-auto outline mb-0" style="padding: 0.3rem 0.5rem" @click="toggleSelectMode"
+        :disabled="fileList.length === 0">
         {{ selectMode && fileList.length ? 'Quit Selection Mode' : 'Selection Mode' }}
       </button>
 
       <div v-show="selectMode" class="w-full flex space-x-2 mt-2">
-        <button
-          :disabled="selectedFiles.length === 0"
-          class="text-xs inline-block w-auto outline mb-0 border-red-500 text-red-500"
-          style="padding: 0.3rem 0.5rem"
-          @click="deleteSelectedFiles"
-        >Delete Selected
+        <button :disabled="selectedFiles.length === 0"
+          class="text-xs inline-block w-auto outline mb-0 border-red-500 text-red-500" style="padding: 0.3rem 0.5rem"
+          @click="deleteSelectedFiles">Delete Selected
         </button>
-        <button
-          :disabled="selectedFiles.length === 0"
+        <button :disabled="selectedFiles.length === 0"
           class="text-xs inline-block w-auto outline mb-0 border-blue-500 text-blue-500 dark:border-blue-400 dark:text-blue-400"
-          style="padding: 0.3rem 0.5rem"
-          @click="copySelectedFileUrls"
-        >
+          style="padding: 0.3rem 0.5rem" @click="copySelectedFileUrls">
           {{ copyButtonText }}
         </button>
       </div>
     </div>
 
     <div>
-      <div
-        class="text-xs"
-        v-show="!loading && fileList.length === 0 && !loadDataErrorText"
-      >
+      <div class="text-xs" v-show="!loading && fileList.length === 0 && !loadDataErrorText">
         Seems like we got nothing here.
       </div>
       <div class="text-red-500 text-xs" v-show="loadDataErrorText">
         {{ loadDataErrorText }}
 
-        <pre
-          class="mt-2"
-        ><code class="text-xs">{{ loadDataErrorStack }}</code></pre>
+        <pre class="mt-2"><code class="text-xs">{{ loadDataErrorStack }}</code></pre>
       </div>
       <div class="text-xs mb-4" v-show="fileList.length > 0">
-        <span class="font-bold">{{ globalCursor ? 'More than' : '' }}</span> {{ fileList.length }} file{{ fileList.length === 1 ? '' : 's' }},
+        <span class="font-bold">{{ globalCursor ? 'More than' : '' }}</span> {{ fileList.length }} file{{
+          fileList.length === 1 ? '' : 's' }},
         {{ parseByteSize(allFileSize) }} total.
-        <button class="inline outline px-2 py-1 text-xs w-auto mb-0" v-show="globalCursor" @click="loadData('more')" :aria-busy="loading">Load more</button>
+        <button class="inline outline px-2 py-1 text-xs w-auto mb-0" v-show="globalCursor" @click="loadData('more')"
+          :aria-busy="loading">Load more</button>
       </div>
 
       <div class="text-xs mb-2" v-show="fileList.length > 0">
@@ -75,85 +56,88 @@
 
       <div class="pb-4" v-show="fileList.length > 0">
         <label for="seeFolderStructure" class="text-xs" :aria-busy="reconstructing">
-          <input type="checkbox" id="seeFolderStructure" v-model="seeFolderStructure" class="mr-2" :disabled="reconstructing"> Folder Structure
+          <input type="checkbox" id="seeFolderStructure" v-model="seeFolderStructure" class="mr-2"
+            :disabled="reconstructing"> Folder Structure
         </label>
       </div>
 
       <div>
-        <div
-          class="rounded-lg mb-2"
-          :class="seeFolderStructure ? 'bg-neutral-50 dark:bg-[#333] p-2 shadow' : ''"
-          v-for="folder in Object.keys(dirMap).map(el => {
-            return {
-              name: el,
-              timestamp: Date.now()
-            }
-          })"
-          :key="folder.name + '_' + structureId"
-        >
+        <div class="rounded-lg mb-2" :class="seeFolderStructure ? 'bg-neutral-50 dark:bg-[#333] p-2 shadow' : ''" v-for="folder in Object.keys(dirMap).map(el => {
+          return {
+            name: el,
+            timestamp: Date.now()
+          }
+        })" :key="folder.name + '_' + structureId">
           <details open class="mb-0 pb-1">
             <summary class="text-xs" v-show="seeFolderStructure">
               {{ folder.name }}
             </summary>
 
-            <div class="mb-2 text-xs" v-show="selectMode" @mouseenter="mouseOnSelectionCheckbox = true" @mouseleave="mouseOnSelectionCheckbox = false">
-              <label :for="folder.name"><input
-                name="select_all_for_folder"
-                class="mr-2"
-                type="checkbox"
-                :id="folder.name"
-                @change="handleFolderSelect(folder.name)"
-              /> Select All</label>
+            <div class="mb-2 text-xs" v-show="selectMode" @mouseenter="mouseOnSelectionCheckbox = true"
+              @mouseleave="mouseOnSelectionCheckbox = false">
+              <label :for="folder.name"><input name="select_all_for_folder" class="mr-2" type="checkbox"
+                  :id="folder.name" @change="handleFolderSelect(folder.name)" /> Select All</label>
             </div>
-            <div
-              class="item mb-2 rounded text-sm py-1 flex items-center justify-between"
-              :class="seeFolderStructure ? 'pl-4' : ''"
-              v-for="item in dirMap[folder.name]"
-            >
+            <div class="item mb-2 rounded text-sm py-1 flex items-center justify-between"
+              :class="seeFolderStructure ? 'pl-4' : ''" v-for="item in dirMap[folder.name]">
               <div class="w-[2rem]" v-show="selectMode">
-                <input
-                  type="checkbox"
-                  @change="updateSelectedFiles(item, folder.name)"
-                  v-model="item.selected"
-                  :id="item.key"
-                />
+                <input type="checkbox" @change="updateSelectedFiles(item, folder.name)" v-model="item.selected"
+                  :id="item.key" />
               </div>
-              <div
-                class="name whitespace-nowrap text-left text-ellipsis overflow-hidden break-all"
-                style="width: calc(100% - 7rem)"
-                :style="{
-                width: selectMode ? 'calc(100% - 2rem)' : 'calc(100% - 5rem)'
-              }"
-              >
-                <div
-                  class="w-full overflow-hidden text-ellipsis whitespace-nowrap"
-                >
-                  <a
-                    :href="(customDomain ? customDomain : endPoint) + item.key"
-                    target="_blank"
-                    v-show="!selectMode"
-                  >{{ item.fileName }}</a
-                  >
+              <div class="name whitespace-nowrap text-left text-ellipsis overflow-hidden break-all"
+                style="width: calc(100% - 7rem)" :style="{
+                  width: selectMode ? 'calc(100% - 2rem)' : 'calc(100% - 5rem)'
+                }">
+                <div class="w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                  <a :href="(customDomain ? customDomain : endPoint) + item.key" target="_blank" v-show="!selectMode">{{
+                    item.fileName }}</a>
                   <label v-show="selectMode" :for="item.key" class="mb-0">{{
-                      item.fileName
-                    }}</label>
+                    item.fileName
+                  }}</label>
                 </div>
               </div>
-              <div
-                class="actions w-[5rem] shrink-0 text-right"
-                v-show="!selectMode"
-              >
-                <button
-                  style="border: none; padding: 0.2rem 0.3rem"
-                  class="w-auto inline-block outline text-xs text-red-500 mb-0"
-                  @click="deleteThisFile(item.key)"
-                  :aria-busy="deletingKey === item.key"
-                  :disabled="deletingKey === item.key"
-                >Delete
+              <div class="actions w-[5rem] shrink-0 text-right" v-show="!selectMode">
+                <button style="border: none; padding: 0.2rem 0.3rem"
+                  class="w-auto inline-block outline text-xs text-red-500 mb-0" @click="deleteThisFile(item.key)"
+                  :aria-busy="deletingKey === item.key" :disabled="deletingKey === item.key">Delete
+                </button>
+              </div>
+              <div class="actions w-[3rem] shrink-0 text-right" v-show="!selectMode">
+                <button style="border: none; padding: 0.2rem 0.3rem"
+                  class="w-auto inline-block outline text-xs text-emerald-700 mb-0" @click="openShareModal(item.key)"
+                  :disabled="sharingKey === item.key">Share
                 </button>
               </div>
             </div>
           </details>
+        </div>
+      </div>
+      <div v-show="sharingKey">
+        <div class="rounded-lg mb-2" :class="seeFolderStructure ? 'bg-neutral-50 dark:bg-[#333] p-2 shadow' : ''">
+          <span class="mb-2 text-xs">Sharing: {{ sharingKey }}</span>
+          <div class="flex justify-between gap-3 mt-3">
+            <span class="mb-0 whitespace-nowrap mb-auto text-xs">Expire date:</span>
+            <input type="date" v-model="expireDate">
+            <button
+              class="inline-block shadow transition-all hover:shadow-xl hover:rounded-3xl bg-emerald-400 text-white border-none"
+              @click="sharingThisFile(sharingKey)" :disabled="uploading" :aria-busy="shareLoading">
+              🔥 Share
+            </button>
+          </div>
+          <div class="flex justify-between gap-3">
+            <input type="text" v-model="presignedUrl" placeholder="Your presigned url" disabled>
+            <button
+              class="inline-block w-auto shadow transition-all hover:shadow-xl hover:rounded-3xl border-none bg-emerald-900 text-white"
+              @click="copyToClipboard">
+              Copy
+            </button>
+          </div>
+
+          <button
+            class="inline-block w-auto shadow transition-all hover:shadow-xl hover:rounded-3xl bg-red-500 border-none"
+            @click="closeSharingModal">
+            Close
+          </button>
         </div>
       </div>
     </div>
@@ -161,11 +145,11 @@
 </template>
 
 <script setup>
-import {onMounted, ref, watch} from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import axios from 'axios'
-import {useStatusStore} from '../store/status'
-import {storeToRefs} from 'pinia'
-import {nanoid} from 'nanoid'
+import { useStatusStore } from '../store/status'
+import { storeToRefs } from 'pinia'
+import { nanoid } from 'nanoid'
 
 let sort = ref('0')
 
@@ -203,7 +187,7 @@ function getSortVariables(val) {
     sortType = 'asc'
   }
 
-  return {sortKey, sortType}
+  return { sortKey, sortType }
 }
 
 let sortFileList = function (sortKey, sortType) {
@@ -224,7 +208,7 @@ let sortFileList = function (sortKey, sortType) {
 }
 
 let statusStore = useStatusStore()
-let {uploading, endPointUpdated} = storeToRefs(statusStore)
+let { uploading, endPointUpdated } = storeToRefs(statusStore)
 
 let selectMode = ref(false)
 
@@ -443,7 +427,7 @@ async function mapFilesToDir() {
 
   let start = Date.now()
 
-  let {sortKey, sortType} = getSortVariables(sort.value)
+  let { sortKey, sortType } = getSortVariables(sort.value)
   let temp = sortFileList(sortKey, sortType)
 
   fileList.value = temp
@@ -505,6 +489,61 @@ let deleteThisFile = function (key, isBatchDelete = false, options = {}) {
       deletingKey.value = ''
       alert('Failed to delete file.')
     })
+}
+let sharingKey = ref('')
+let presignedUrl = ref('')
+let expireDate = ref('')
+let shareLoading = ref(false)
+
+let openShareModal = function (key) {
+  sharingKey.value = key
+  return;
+}
+let sharingThisFile = function (key) {
+  sharingKey.value = key;
+  shareLoading.value = true;
+
+  if (!expireDate.value) {
+    let c = confirm('Share without time limit?')
+    if (!c) {
+      shareLoading.value = false;
+      return;
+    }
+  }
+
+  let fileName = '/' + key
+  if (endPoint[endPoint.length - 1] === '/') {
+    fileName = key
+  }
+
+  axios({
+    method: 'get',
+    headers: {
+      'x-api-key': localStorage.getItem('apiKey')
+    },
+    url: endPoint + 'share?Key=' + fileName + '&ExpireTime=' + expireDate.value
+  })
+    .then(async (res) => {
+      const demo = res.data.url;
+      const value = "https://my-bucket.s3.amazonaws.com/photos/image1.jpg?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1633017600&Signature=OjnLpbKhxRVrbmp57UpO91G7EXAMPLE"
+      presignedUrl.value = value
+    })
+    .catch(() => {
+      const value = "https://my-bucket.s3.amazonaws.com/photos/image1.jpg?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1633017600&Signature=OjnLpbKhxRVrbmp57UpO91G7EXAMPLE"
+      presignedUrl.value = value
+      //alert('Failed to delete file.')
+    })
+  shareLoading.value = false;
+}
+
+let copyToClipboard = function () {
+  navigator.clipboard.writeText(presignedUrl.value).then(() => alert('Copied to clipboard!'));
+}
+
+let closeSharingModal = function () {
+  sharingKey.value = ''
+  presignedUrl.value = ''
+  expireDate.value = ''
 }
 
 watch(fileList, (newVal) => {
