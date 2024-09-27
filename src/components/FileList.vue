@@ -129,7 +129,7 @@
             <button
               class="inline-block w-auto shadow transition-all hover:shadow-xl hover:rounded-3xl border-none bg-emerald-900 text-white"
               @click="copyToClipboard">
-              Copy
+              {{  isCopied ? 'Copied!' : 'Copy' }}
             </button>
           </div>
 
@@ -494,14 +494,20 @@ let sharingKey = ref('')
 let presignedUrl = ref('')
 let expireDate = ref('')
 let shareLoading = ref(false)
+let isCopied = ref(false)
 
 let openShareModal = function (key) {
   sharingKey.value = key
+  isCopied.value = false
+  expireDate.value = ''
+  presignedUrl.value = ''
+  shareLoading.value = false
   return;
 }
 let sharingThisFile = function (key) {
   sharingKey.value = key;
   shareLoading.value = true;
+  isCopied.value = false;
 
   if (!expireDate.value) {
     let c = confirm('Share without time limit?')
@@ -526,6 +532,7 @@ let sharingThisFile = function (key) {
     .then(async (res) => {
       const url = endPoint + fileName + '?PresignedUrl=' + res.data
       presignedUrl.value = url
+      isCopied.value = false
     })
     .catch(() => {
       presignedUrl.value = '';
@@ -535,7 +542,7 @@ let sharingThisFile = function (key) {
 }
 
 let copyToClipboard = function () {
-  navigator.clipboard.writeText(presignedUrl.value).then(() => alert('Copied to clipboard!'));
+  navigator.clipboard.writeText(presignedUrl.value).then(() => isCopied.value = true);
 }
 
 let closeSharingModal = function () {
