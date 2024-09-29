@@ -150,8 +150,10 @@ import axios from 'axios'
 import { useStatusStore } from '../store/status'
 import { storeToRefs } from 'pinia'
 import { nanoid } from 'nanoid'
+import { useFolderStore } from '../store/folder'
 
 let sort = ref('0')
+let folderStore = useFolderStore();
 
 onMounted(() => {
   if (localStorage.getItem('seeFolderStructure') === '1') {
@@ -450,6 +452,10 @@ watch(seeFolderStructure, async () => {
   await mapFilesToDir()
 })
 
+watch(dirMap, function(val) {
+  folderStore.updateFolderList(val);
+})
+
 let deletingKey = ref('')
 let deleteThisFile = function (key, isBatchDelete = false, options = {}) {
   let c = true
@@ -536,7 +542,7 @@ let sharingThisFile = function (key) {
     })
     .catch(() => {
       presignedUrl.value = '';
-      alert('Failed to delete file.')
+      alert('Failed to share this file.')
     })
   shareLoading.value = false;
 }
