@@ -82,7 +82,7 @@
           <div class="flex mb-2 items-center">
             <input type="checkbox" class="text-xs shrink-0" :disabled="uploading" v-model="changeFolder"
               id="changeFolderId" />
-            <label class="text-xs whitespace-nowrap" for="compressImagesBeforeUploading"> Upload to folder:
+            <label class="text-xs whitespace-nowrap" for="changeFolderId"> Upload to folder:
               <select class="text-xs inline-block w-[10rem] mb-0 mt-0 ml-1" v-model="folderSelected">
                 <option v-for="option in folderOptions" :value="option.value">
                   {{ option.text }}
