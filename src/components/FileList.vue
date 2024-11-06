@@ -89,7 +89,7 @@
                   width: selectMode ? 'calc(100% - 2rem)' : 'calc(100% - 5rem)'
                 }">
                 <div class="w-full overflow-hidden text-ellipsis whitespace-nowrap">
-                  <a :href="(customDomain ? customDomain : endPoint) + item.key" target="_blank" v-show="!selectMode">{{
+                  <a :href="(customDomain ? customDomain : endPoint) + item.key + publicToken" target="_blank" v-show="!selectMode">{{
                     item.fileName }}</a>
                   <label v-show="selectMode" :for="item.key" class="mb-0">{{
                     item.fileName
@@ -217,12 +217,14 @@ let selectMode = ref(false)
 let endPoint = localStorage.getItem('endPoint')
 let apiKey = localStorage.getItem('apiKey')
 let customDomain = localStorage.getItem('customDomain')
+let publicToken = localStorage.getItem('publicToken') ? '?Token=' + localStorage.getItem('publicToken') : ''
 
 watch(uploading, (newVal) => {
   if (!newVal) {
     endPoint = localStorage.getItem('endPoint')
     apiKey = localStorage.getItem('apiKey')
     customDomain = localStorage.getItem('customDomain')
+    publicToken = localStorage.getItem('publicToken') ? '?Token=' + localStorage.getItem('publicToken') : ''
     loadData()
   }
 })
@@ -231,6 +233,7 @@ watch(endPointUpdated, (newVal) => {
   endPoint = localStorage.getItem('endPoint')
   apiKey = localStorage.getItem('apiKey')
   customDomain = localStorage.getItem('customDomain')
+  publicToken = localStorage.getItem('publicToken') ? '?Token=' + localStorage.getItem('publicToken') : ''
   fileList.value = []
   dirMap.value = {}
   loadData()

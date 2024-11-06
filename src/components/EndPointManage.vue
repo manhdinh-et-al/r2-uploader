@@ -47,6 +47,11 @@
                    id="api_key" class="text-xs">
           </div>
           <div>
+            <label for="public_token" class="text-sm">Workers Endpoint Public Token</label>
+            <input type="password" placeholder="public token to get all data" v-model="newPublicToken" required
+                   id="public_token" class="text-xs">
+          </div>
+          <div>
             <label for="custom_domain" class="text-sm">Custom Domain (Optional)</label>
             <input type="text" placeholder="no need for the https:// prefix" v-model="newCustomDomain"
                    id="custom_domain"
@@ -84,6 +89,7 @@ let { endPointPulled } = storeToRefs(statusStore)
 
 let endPoint = ref('')
 let apiKey = ref('')
+let publicToken = ref('')
 let btnText = ref('Save To LocalStorage')
 let btnDisabled = ref(false)
 let endPointList = ref([])
@@ -92,6 +98,7 @@ let customDomain = ref('')
 
 let newEndpoint = ref('')
 let newApiKey = ref('')
+let newPublicToken = ref('')
 let newCustomDomain = ref('')
 
 let editingEndpoint = ref('')
@@ -102,12 +109,14 @@ let editThisEndpoint = function (endpoint) {
     animateText(endpointActionText, 'Add a new endpoint')
     newEndpoint.value = ''
     newApiKey.value = ''
+    newPublicToken.value = ''
     newCustomDomain.value = ''
     return
   }
 
   newEndpoint.value = endpoint
   newApiKey.value = endPointList.value.find(item => item.endPoint === endpoint).apiKey
+  newPublicToken.value = endPointList.value.find(item => item.endPoint === endpoint).publicToken || ''
   newCustomDomain.value = endPointList.value.find(item => item.endPoint === endpoint).customDomain || ''
 
   if (newCustomDomain.value !== '') {
@@ -139,10 +148,12 @@ const deleteThisEndPoint = function (endpoint) {
   if (endPointList.value.length === 0) {
     localStorage.removeItem('endPoint')
     localStorage.removeItem('apiKey')
+    localStorage.removeItem('publicToken')
     localStorage.removeItem('customDomain')
 
     endPoint.value = ''
     apiKey.value = ''
+    publicToken.value = ''
     customDomain.value = ''
 
     statusStore.endPointUpdated += 1
@@ -154,6 +165,7 @@ const deleteThisEndPoint = function (endpoint) {
 const restoreSavedApiInfo = function () {
   endPoint.value = localStorage.getItem('endPoint') || ''
   apiKey.value = localStorage.getItem('apiKey') || ''
+  publicToken.value = localStorage.getItem('publicToken') || ''
   customDomain.value = localStorage.getItem('customDomain') || ''
 }
 
@@ -162,10 +174,12 @@ let updateCurrentEndPoint = function (endpoint) {
 
   endPoint.value = item.endPoint
   apiKey.value = item.apiKey
+  publicToken.value = item.publicToken || ''
   customDomain.value = item.customDomain || ''
 
   localStorage.setItem('endPoint', item.endPoint)
   localStorage.setItem('apiKey', item.apiKey)
+  localStorage.setItem('publicToken', item.publicToken || '')
   localStorage.setItem('customDomain', item.customDomain || '')
   statusStore.endPointUpdated += 1
 }
@@ -204,6 +218,7 @@ const saveApiInfo = function () {
   // if duplicated, update the apiKey and customDomain
   if (duplicate) {
     duplicate.apiKey = newApiKey.value
+    duplicate.publicToken = newPublicToken.value
     duplicate.customDomain = newCustomDomain.value
     endPointList.value = endPointList.value.filter(item => item.endPoint !== newEndpoint.value)
     endPointList.value.push(duplicate)
@@ -215,6 +230,7 @@ const saveApiInfo = function () {
     endPointList.value.push({
       endPoint: newEndpoint.value,
       apiKey: newApiKey.value,
+      publicToken: newPublicToken.value,
       customDomain: newCustomDomain.value
     })
   }
@@ -236,6 +252,7 @@ const saveApiInfo = function () {
 
   newEndpoint.value = ''
   newApiKey.value = ''
+  newPublicToken.value = ''
   newCustomDomain.value = ''
 
   setTimeout(() => {
@@ -268,6 +285,7 @@ watch(endPointPulled, val => {
   if (endPointList.value.length >= 1) {
     endPoint.value = endPointList.value[0].endPoint
     apiKey.value = endPointList.value[0].apiKey
+    publicToken.value = endPointList.value[0].publicToken || ''
     customDomain.value = endPointList.value[0].customDomain || ''
     updateCurrentEndPoint(endPointList.value[0].endPoint)
   }
